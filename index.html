@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azhad Ghufran — Full Stack Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --neon-cyan: #00f5ff;
+      --neon-green: #39ff14;
+      --neon-purple: #bf5fff;
+      --neon-orange: #ff6b35;
+      --dark-bg: #020408;
+      --dark-card: #060d14;
+      --dark-border: #0a1628;
+      --grid-color: rgba(0, 245, 255, 0.04);
+      --text-primary: #e8f4f8;
+      --text-secondary: #7a9bb5;
+      --text-muted: #3a5570;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CUSTOM CURSOR */
+    .cursor {
+      position: fixed;
+      width: 12px; height: 12px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid var(--neon-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: all 0.1s ease;
+      opacity: 0.6;
+    }
+    body:hover .cursor { opacity: 1; }
+
+    /* GRID BACKGROUND */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* SCANLINES */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* CANVAS */
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(2,4,8,0.95) 0%, transparent 100%);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,245,255,0.08);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: var(--neon-cyan);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 20px rgba(0,245,255,0.5);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--neon-green); }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.3s, text-shadow 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::before {
+      content: '//';
+      color: var(--neon-cyan);
+      margin-right: 6px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,245,255,0.5); }
+    .nav-links a:hover::before { opacity: 1; }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 5px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: var(--neon-cyan);
+      transition: all 0.3s;
+    }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 2; }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 60px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--neon-green);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-tag::before {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--neon-green);
+      box-shadow: 0 0 8px var(--neon-green);
+    }
+
+    .hero-name {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(2.5rem, 6vw, 5.5rem);
+      line-height: 1.05;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .hero-name .highlight {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 30px rgba(0,245,255,0.4), 0 0 60px rgba(0,245,255,0.2);
+      display: block;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: var(--neon-purple);
+      letter-spacing: 0.2em;
+      margin-bottom: 28px;
+      text-shadow: 0 0 15px rgba(191,95,255,0.4);
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin-bottom: 50px;
+      font-weight: 400;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-bottom: 50px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      position: relative;
+    }
+
+    .stat-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 20px rgba(0,245,255,0.5);
+      display: block;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-top: 6px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dark-bg);
+      background: var(--neon-cyan);
+      border: none;
+      padding: 16px 36px;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--neon-green);
+      transform: translateX(-100%);
+      transition: transform 0.3s;
+    }
+
+    .btn-primary:hover { box-shadow: 0 0 30px rgba(0,245,255,0.5); }
+    .btn-primary:hover::before { transform: translateX(0); }
+    .btn-primary span { position: relative; z-index: 1; }
+
+    .btn-secondary {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--neon-cyan);
+      background: transparent;
+      border: 1px solid rgba(0,245,255,0.4);
+      padding: 16px 36px;
+      text-decoration: none;
+      transition: all 0.3s;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0,245,255,0.08);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0,245,255,0.2);
+    }
+
+    /* HERO DECORATION */
+    .hero-visual {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 45%;
+      max-width: 550px;
+      pointer-events: none;
+    }
+
+    .hex-grid {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+    }
+
+    .hex-ring {
+      position: absolute;
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 50%;
+      animation: spin-slow linear infinite;
+    }
+
+    .hex-ring:nth-child(1) { inset: 15%; animation-duration: 20s; border-color: rgba(0,245,255,0.15); }
+    .hex-ring:nth-child(2) { inset: 25%; animation-duration: 15s; animation-direction: reverse; border-color: rgba(191,95,255,0.15); }
+    .hex-ring:nth-child(3) { inset: 38%; animation-duration: 10s; border-color: rgba(57,255,20,0.15); }
+
+    .hex-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .center-avatar {
+      position: absolute;
+      inset: 35%;
+      background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(191,95,255,0.1));
+      border: 1px solid rgba(0,245,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-family: 'Orbitron', monospace;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 20px rgba(0,245,255,0.5);
+    }
+
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* SECTION STYLES */
+    .section-header {
+      margin-bottom: 64px;
+    }
+
+    .section-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--neon-green);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      max-width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--neon-green), transparent);
+    }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .section-title .accent { color: var(--neon-cyan); }
+
+    /* ABOUT */
+    #about {
+      padding: 120px 60px;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .about-text p {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .about-text p strong {
+      color: var(--neon-cyan);
+      font-weight: 600;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple), transparent);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -34px;
+      top: 8px;
+      width: 10px;
+      height: 10px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .timeline-year {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--neon-green);
+      letter-spacing: 0.2em;
+      margin-bottom: 6px;
+    }
+
+    .timeline-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .timeline-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* SKILLS */
+    #skills {
+      padding: 120px 60px;
+      background: linear-gradient(180deg, transparent, rgba(0,245,255,0.02), transparent);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .skill-card {
+      background: var(--dark-card);
+      border: 1px solid rgba(0,245,255,0.08);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,245,255,0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .skill-card:hover {
+      border-color: rgba(0,245,255,0.3);
+      box-shadow: 0 0 30px rgba(0,245,255,0.08);
+      transform: translateY(-4px);
+    }
+
+    .skill-card:hover::before { opacity: 1; }
+
+    .skill-card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+
+    .skill-card-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      background: rgba(0,245,255,0.06);
+      border: 1px solid rgba(0,245,255,0.12);
+      padding: 5px 12px;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+
+    .skill-tag:hover {
+      color: var(--neon-cyan);
+      background: rgba(0,245,255,0.12);
+      border-color: rgba(0,245,255,0.3);
+    }
+
+    /* EXPERIENCE */
+    #experience {
+      padding: 120px 60px;
+    }
+
+    .exp-container {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .exp-card {
+      background: var(--dark-card);
+      border: 1px solid rgba(0,245,255,0.08);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .exp-card::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .exp-card:hover {
+      border-color: rgba(0,245,255,0.2);
+      box-shadow: 0 0 40px rgba(0,245,255,0.06);
+    }
+
+    .exp-card:hover::after { opacity: 1; }
+
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .exp-company {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 15px rgba(0,245,255,0.3);
+    }
+
+    .exp-role {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--neon-purple);
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .exp-period {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--neon-green);
+      letter-spacing: 0.15em;
+      background: rgba(57,255,20,0.08);
+      border: 1px solid rgba(57,255,20,0.2);
+      padding: 6px 14px;
+      white-space: nowrap;
+    }
+
+    .exp-points {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .exp-points li {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .exp-points li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--neon-cyan);
+      font-size: 0.8rem;
+    }
+
+    .exp-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,245,255,0.06);
+    }
+
+    .exp-tech-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--neon-orange);
+      background: rgba(255,107,53,0.08);
+      border: 1px solid rgba(255,107,53,0.2);
+      padding: 4px 12px;
+      letter-spacing: 0.08em;
+    }
+
+    /* JOURNEY */
+    #journey {
+      padding: 120px 60px;
+      background: linear-gradient(180deg, transparent, rgba(191,95,255,0.02), transparent);
+    }
+
+    .journey-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .journey-card {
+      background: var(--dark-card);
+      border: 1px solid rgba(191,95,255,0.1);
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    }
+
+    .journey-card::before {
+      content: attr(data-year);
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      color: var(--neon-purple);
+      opacity: 0.5;
+      letter-spacing: 0.1em;
+    }
+
+    .journey-card:hover {
+      border-color: rgba(191,95,255,0.3);
+      box-shadow: 0 0 30px rgba(191,95,255,0.08);
+      transform: translateY(-4px);
+    }
+
+    .journey-icon {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .journey-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--neon-purple);
+      margin-bottom: 12px;
+      letter-spacing: 0.1em;
+    }
+
+    .journey-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* CONTACT */
+    #contact {
+      padding: 120px 60px 80px;
+    }
+
+    .contact-wrapper {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .contact-tagline {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 60px;
+    }
+
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+
+    .contact-link {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      text-decoration: none;
+      border: 1px solid rgba(0,245,255,0.15);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+
+    .contact-link .link-icon { font-size: 1.1rem; }
+
+    .contact-link:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      background: rgba(0,245,255,0.06);
+      box-shadow: 0 0 20px rgba(0,245,255,0.15);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 32px 60px;
+      border-top: 1px solid rgba(0,245,255,0.06);
+      position: relative;
+      z-index: 2;
+    }
+
+    footer p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+    }
+
+    footer span { color: var(--neon-cyan); }
+
+    /* GLITCH EFFECT */
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 1px); }
+      40% { transform: translate(2px, -1px); }
+      60% { transform: translate(-1px, 2px); }
+      80% { transform: translate(1px, -2px); }
+      100% { transform: translate(0); }
+    }
+
+    .glitch:hover {
+      animation: glitch 0.3s ease-in-out;
+    }
+
+    /* ANIMATE ON SCROLL */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-up:nth-child(1) { transition-delay: 0.05s; }
+    .fade-up:nth-child(2) { transition-delay: 0.15s; }
+    .fade-up:nth-child(3) { transition-delay: 0.25s; }
+    .fade-up:nth-child(4) { transition-delay: 0.35s; }
+    .fade-up:nth-child(5) { transition-delay: 0.45s; }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      nav { padding: 18px 24px; }
+      .nav-links { display: none; flex-direction: column; gap: 24px; }
+      .nav-links.open {
+        display: flex;
+        position: fixed;
+        top: 64px; left: 0; right: 0;
+        background: rgba(2,4,8,0.98);
+        backdrop-filter: blur(20px);
+        padding: 40px 24px;
+        border-bottom: 1px solid rgba(0,245,255,0.1);
+        z-index: 99;
+      }
+      .hamburger { display: flex; }
+
+      #hero { padding: 120px 24px 60px; }
+      .hero-visual { display: none; }
+      .hero-stats { gap: 32px; }
+
+      #about, #skills, #experience, #journey, #contact { padding: 80px 24px; }
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .exp-card { padding: 32px 24px; }
+      .exp-header { flex-direction: column; }
+
+      body { cursor: auto; }
+      .cursor, .cursor-ring { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-name { font-size: 2.2rem; }
+      .hero-stats { gap: 20px; }
+      .stat-number { font-size: 1.8rem; }
+      .contact-link { padding: 14px 20px; font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+  <div class="grid-bg"></div>
+  <div class="scanlines"></div>
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="nav-logo glitch">AG<span>.</span>dev</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#journey">Journey</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-content">
+      <div class="hero-tag">// Backend-Focused Full Stack Developer</div>
+      <h1 class="hero-name">
+        Azhad
+        <span class="highlight">Ghufran</span>
+      </h1>
+      <div class="hero-title">[ SDE-II · Node.js · GraphQL · Cloud ]</div>
+      <p class="hero-desc">
+        Building scalable systems and high-quality web applications with 4.5+ years of production experience.
+        Expert in robust APIs, authentication, database-driven architecture — powered by AWS &amp; GCP.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number" data-target="4.5">0</span>
+          <div class="stat-label">Years Exp.</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="20">0</span>
+          <div class="stat-label">Scripts Built</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="2">0</span>
+          <div class="stat-label">Companies</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="10">0</span>
+          <div class="stat-label">Tech Stack+</div>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <a href="#experience" class="btn-primary"><span>View Work</span></a>
+        <a href="#contact" class="btn-secondary">Get In Touch</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hex-grid">
+        <div class="hex-ring"></div>
+        <div class="hex-ring"></div>
+        <div class="hex-ring"></div>
+        <div class="center-avatar">AG</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-header fade-up">
+      <div class="section-tag">01 // About Me</div>
+      <h2 class="section-title">Who I <span class="accent">Am</span></h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text fade-up">
+        <p>
+          I'm a <strong>backend-focused full-stack developer</strong> from Delhi, India, with 4.5 years of
+          professional experience crafting scalable web applications that serve millions of users.
+        </p>
+        <p>
+          My journey started with curiosity and a Computer Science degree from <strong>Shaheed Sukhdev College of
+          Business Studies, University of Delhi</strong>. From there, I dove deep into Python, Data Science,
+          and eventually found my passion in full-stack web development.
+        </p>
+        <p>
+          Today, I design and implement <strong>robust APIs, complex business logic, authentication systems</strong>,
+          and database-driven architectures on AWS and GCP. I believe in end-to-end ownership
+          and clean, maintainable code that scales.
+        </p>
+        <p>
+          Currently leveraging <strong>AI-powered tools</strong> like GitHub Copilot and Cursor to push
+          the boundaries of developer productivity and code quality.
+        </p>
+      </div>
+      <div class="fade-up">
+        <div class="section-tag" style="margin-bottom:24px;">// Education Timeline</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-year">2014</div>
+            <div class="timeline-title">10th — UP Board</div>
+            <div class="timeline-desc">Talimuddin Inter College — Foundational academics</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2016</div>
+            <div class="timeline-title">12th — UP Board</div>
+            <div class="timeline-desc">Talimuddin Inter College — Science stream completed</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2016–2019</div>
+            <div class="timeline-title">B.Sc (Hons.) Computer Science</div>
+            <div class="timeline-desc">Shaheed Sukhdev College of Business Studies, University of Delhi</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2019–2020</div>
+            <div class="timeline-title">Python & Data Science</div>
+            <div class="timeline-desc">6-month Industrial Training — Coding Blocks (Master Course)</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">Mar–Oct 2021</div>
+            <div class="timeline-title">Full Stack Web Development</div>
+            <div class="timeline-desc">6-month intensive bootcamp — Newton School</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">Oct 2021</div>
+            <div class="timeline-title">🚀 Professional Career Begins</div>
+            <div class="timeline-desc">Joined ShopDeck as Member of Technical Staff</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-header fade-up">
+      <div class="section-tag">02 // Capabilities</div>
+      <h2 class="section-title">My <span class="accent">Arsenal</span></h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card fade-up">
+        <div class="skill-card-icon">⚡</div>
+        <div class="skill-card-title">Languages</div>
+        <div class="skill-tags">
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">TypeScript</span>
+          <span class="skill-tag">Python</span>
+        </div>
+      </div>
+      <div class="skill-card fade-up">
+        <div class="skill-card-icon">🛠️</div>
+        <div class="skill-card-title">Frameworks & Runtime</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Node.js</span>
+          <span class="skill-tag">NestJS</span>
+          <span class="skill-tag">ExpressJS</span>
+          <span class="skill-tag">GraphQL</span>
+          <span class="skill-tag">ReactJS</span>
+        </div>
+      </div>
+      <div class="skill-card fade-up">
+        <div class="skill-card-icon">🗄️</div>
+        <div class="skill-card-title">Databases</div>
+        <div class="skill-tags">
+          <span class="skill-tag">MongoDB</span>
+          <span class="skill-tag">PostgreSQL</span>
+        </div>
+      </div>
+      <div class="skill-card fade-up">
+        <div class="skill-card-icon">☁️</div>
+        <div class="skill-card-title">Cloud Platforms</div>
+        <div class="skill-tags">
+          <span class="skill-tag">AWS</span>
+          <span class="skill-tag">GCP</span>
+          <span class="skill-tag">Amazon S3</span>
+          <span class="skill-tag">ECS</span>
+          <span class="skill-tag">SQS</span>
+        </div>
+      </div>
+      <div class="skill-card fade-up">
+        <div class="skill-card-icon">📡</div>
+        <div class="skill-card-title">Messaging & Streaming</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Apache Kafka</span>
+          <span class="skill-tag">Google Pub/Sub</span>
+          <span class="skill-tag">Cron Jobs</span>
+        </div>
+      </div>
+      <div class="skill-card fade-up">
+        <div class="skill-card-icon">🔍</div>
+        <div class="skill-card-title">Dev & Monitoring Tools</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Cursor</span>
+          <span class="skill-tag">Datadog</span>
+          <span class="skill-tag">Kibana</span>
+          <span class="skill-tag">Sentry</span>
+          <span class="skill-tag">JIRA</span>
+          <span class="skill-tag">GitHub</span>
+          <span class="skill-tag">Jenkins</span>
+          <span class="skill-tag">Postman</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-header fade-up">
+      <div class="section-tag">03 // Work History</div>
+      <h2 class="section-title">Professional <span class="accent">Experience</span></h2>
+    </div>
+    <div class="exp-container">
+
+      <div class="exp-card fade-up">
+        <div class="exp-header">
+          <div>
+            <div class="exp-company">upGrad</div>
+            <div class="exp-role">SDE-II — Full Time</div>
+          </div>
+          <div class="exp-period">Sep 2024 → Feb 2026</div>
+        </div>
+        <ul class="exp-points">
+          <li>Built a complete <strong style="color:#00f5ff">Practice Test System</strong>, created interview page CMS resources, and migrated SQL-based questions &amp; interview content from external platforms to MongoDB — reducing manual content effort significantly.</li>
+          <li>Implemented a <strong style="color:#00f5ff">dynamic footer data system</strong> driven by page type and page slug–level conditions across upGrad and Study Abroad platforms, improving SEO consistency and control at scale.</li>
+          <li>Developed advanced CMS features: bulk meta tag creation/updates, bulk upload reporting, <strong style="color:#00f5ff">AI-generated content guidelines</strong>, Kafka-based row-level processing, multi-type media uploads, file replacement, and copy-link support.</li>
+          <li>Designed reusable layouts and section templates; optimized GraphQL performance using indexing, caching, and query tuning; built scalable backend architecture with <strong style="color:#00f5ff">ChatGPT-4o, DALL·E</strong>, and AI-powered game integrations.</li>
+          <li>Scaled the CMS from domestic to international usage; implemented a middleware-based <strong style="color:#00f5ff">changelog system</strong> tracking who changed what and when with before/after data; built app version control to force iOS/Android updates via CMS.</li>
+        </ul>
+        <div class="exp-tech">
+          <span class="exp-tech-tag">NestJS</span>
+          <span class="exp-tech-tag">GraphQL</span>
+          <span class="exp-tech-tag">MongoDB</span>
+          <span class="exp-tech-tag">Kafka</span>
+          <span class="exp-tech-tag">ChatGPT-4o</span>
+          <span class="exp-tech-tag">DALL·E</span>
+          <span class="exp-tech-tag">Instana</span>
+          <span class="exp-tech-tag">Cursor</span>
+        </div>
+      </div>
+
+      <div class="exp-card fade-up">
+        <div class="exp-header">
+          <div>
+            <div class="exp-company">ShopDeck</div>
+            <div class="exp-role">Member of Technical Staff — Full Time</div>
+          </div>
+          <div class="exp-period">Oct 2021 → Sep 2024</div>
+        </div>
+        <ul class="exp-points">
+          <li>Built and maintained ShopDeck's dashboard including <strong style="color:#00f5ff">order processing, returns (RTO), profit/loss, finance tools</strong>, and shipping calculators used by thousands of sellers.</li>
+          <li>Developed custom React components with Ant Design; optimized performance using lazy loading for enhanced UX on low-bandwidth connections.</li>
+          <li>Implemented backend systems for <strong style="color:#00f5ff">order returns, tracking, CSV/PDF downloads</strong>, and automated messaging via Gupshup integration.</li>
+          <li>Created a <strong style="color:#00f5ff">changelog system with Slack alerts</strong> and database logging for comprehensive system update tracking.</li>
+          <li>Wrote <strong style="color:#00f5ff">20+ JavaScript automation scripts</strong> for data backfilling, CSV imports, task automation, and bots.</li>
+          <li>Built Python DAGs for automated settings management and Slack reporting pipelines.</li>
+          <li>Resolved production issues rapidly by monitoring error channels and coordinating with cross-functional teams.</li>
+        </ul>
+        <div class="exp-tech">
+          <span class="exp-tech-tag">MERN Stack</span>
+          <span class="exp-tech-tag">Ant Design</span>
+          <span class="exp-tech-tag">Sentry</span>
+          <span class="exp-tech-tag">Kibana</span>
+          <span class="exp-tech-tag">Python</span>
+          <span class="exp-tech-tag">Cron</span>
+          <span class="exp-tech-tag">Postman</span>
+          <span class="exp-tech-tag">JIRA</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section id="journey">
+    <div class="section-header fade-up">
+      <div class="section-tag">04 // Origin Story</div>
+      <h2 class="section-title">My <span class="accent">Journey</span></h2>
+    </div>
+    <div class="journey-grid">
+      <div class="journey-card fade-up" data-year="2014-16">
+        <div class="journey-icon">📚</div>
+        <div class="journey-title">School Foundation</div>
+        <div class="journey-desc">Completed 10th and 12th from Talimuddin Inter College, UP Board. Built a strong academic foundation that fueled my curiosity in technology.</div>
+      </div>
+      <div class="journey-card fade-up" data-year="2016-19">
+        <div class="journey-icon">🎓</div>
+        <div class="journey-title">Delhi University</div>
+        <div class="journey-desc">Pursued B.Sc (Hons.) Computer Science at Shaheed Sukhdev College of Business Studies, University of Delhi — deepening my programming knowledge.</div>
+      </div>
+      <div class="journey-card fade-up" data-year="2019-20">
+        <div class="journey-icon">🐍</div>
+        <div class="journey-title">Python & Data Science</div>
+        <div class="journey-desc">Completed a 6-month industrial training in Python and Data Science Master Course at Coding Blocks. Followed by multiple certifications, bootcamps, and open-source contributions.</div>
+      </div>
+      <div class="journey-card fade-up" data-year="2021">
+        <div class="journey-icon">💻</div>
+        <div class="journey-title">Full Stack Bootcamp</div>
+        <div class="journey-desc">Completed Newton School's intensive 6-month Full Stack Web Development program (Mar–Oct 2021) that launched my professional career in software engineering.</div>
+      </div>
+      <div class="journey-card fade-up" data-year="2021-24">
+        <div class="journey-icon">🚀</div>
+        <div class="journey-title">ShopDeck — 3 Years</div>
+        <div class="journey-desc">Joined as Member of Technical Staff. Grew rapidly, building mission-critical systems used by tens of thousands of e-commerce sellers across India.</div>
+      </div>
+      <div class="journey-card fade-up" data-year="2024-26">
+        <div class="journey-icon">⭐</div>
+        <div class="journey-title">upGrad — SDE-II</div>
+        <div class="journey-desc">Leveled up to SDE-II at one of India's largest EdTech platforms. Leading backend systems powering millions of learners with AI-integrated CMS solutions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="contact-wrapper">
+      <div class="section-header fade-up">
+        <div class="section-tag" style="justify-content:center">05 // Contact</div>
+        <h2 class="section-title">Let's <span class="accent">Connect</span></h2>
+      </div>
+      <p class="contact-tagline fade-up">
+        Open to exciting opportunities, collaborations, and interesting conversations.
+        Whether it's a project, a startup idea, or just a tech chat — reach out.
+      </p>
+      <div class="contact-links fade-up">
+        <a href="mailto:azhad.ghufran56@gmail.com" class="contact-link">
+          <span class="link-icon">✉️</span> Email Me
+        </a>
+        <a href="https://github.com/Azhad56" target="_blank" class="contact-link">
+          <span class="link-icon">🐙</span> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/azhad-ghufran-b0842a132/?skipRedirect=true" target="_blank" class="contact-link">
+          <span class="link-icon">💼</span> LinkedIn
+        </a>
+        <a href="tel:+918884069272" class="contact-link">
+          <span class="link-icon">📞</span> Call Me
+        </a>
+      </div>
+      <div class="fade-up" style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.1em;">
+        📍 Delhi, India &nbsp;·&nbsp; +91-8884069272 &nbsp;·&nbsp; azhad.ghufran56@gmail.com
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Designed & Built by <span>Azhad Ghufran</span> · <span>© 2025</span> · Full Stack Developer</p>
+  </footer>
+
+  <script>
+    // CURSOR
+    const cursor = document.getElementById('cursor');
+    const cursorRing = document.getElementById('cursor-ring');
+    let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      cursor.style.left = mouseX + 'px';
+      cursor.style.top = mouseY + 'px';
+    });
+
+    function animateRing() {
+      ringX += (mouseX - ringX) * 0.1;
+      ringY += (mouseY - ringY) * 0.1;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width = '20px';
+        cursor.style.height = '20px';
+        cursor.style.background = 'var(--neon-green)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width = '12px';
+        cursor.style.height = '12px';
+        cursor.style.background = 'var(--neon-cyan)';
+      });
+    });
+
+    // HAMBURGER
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('nav-links');
+    hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+    // PARTICLES
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+        this.size = Math.random() * 1.5 + 0.3;
+        this.opacity = Math.random() * 0.4 + 0.1;
+        this.color = Math.random() > 0.5 ? '0,245,255' : '191,95,255';
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0,245,255,${0.06 * (1 - dist / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => { p.update(); p.draw(); });
+      drawConnections();
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // COUNTER ANIMATION
+    function animateCounter(el, target, duration = 2000) {
+      const isDecimal = target % 1 !== 0;
+      const start = performance.now();
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = eased * target;
+        el.textContent = isDecimal ? value.toFixed(1) : Math.floor(value);
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = isDecimal ? target.toFixed(1) : target;
+      }
+      requestAnimationFrame(update);
+    }
+
+    // SCROLL ANIMATIONS
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Counter trigger
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('[data-target]').forEach(el => {
+            animateCounter(el, parseFloat(el.dataset.target));
+          });
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    const heroStats = document.querySelector('.hero-stats');
+    if (heroStats) counterObserver.observe(heroStats);
+
+    // TYPEWRITER on hero tag
+    const tag = document.querySelector('.hero-tag');
+    if (tag) {
+      const text = tag.textContent;
+      tag.textContent = '';
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          tag.textContent += text[i++];
+          setTimeout(type, 40);
+        }
+      }
+      setTimeout(type, 800);
+    }
+  </script>
+</body>
+</html>
